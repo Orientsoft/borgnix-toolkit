@@ -1,0 +1,34 @@
+{
+  "name": "borgnix-toolkit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "bower install; gulp setup"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Orientsoft/borgnix-toolkit.git"
+  },
+  "author": "INOT603",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Orientsoft/borgnix-toolkit/issues"
+  },
+  "homepage": "https://github.com/Orientsoft/borgnix-toolkit#readme",
+  "dependencies": {
+    "async": "^1.2.1",
+    "intel-hex": "^0.1.1",
+    "requirejs-babel": "0.0.6",
+    "serialport": "^1.7.4",
+    "stk500": "^1.0.3",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "bower": "^1.4.1",
+    "gulp": "^3.9.0",
+    "gulp-shell": "^0.4.2",
+    "node-webkit-builder": "^1.0.12"
+  }
+}

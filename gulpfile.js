@@ -11,9 +11,16 @@ function getPlatform () {
   return 'linux' + arch
 }
 
-gulp.task('setup', shell.task([
+gulp.task('install', ['node-rebuild', 'bower-install'])
+
+gulp.task('node-rebuild', shell.task([
   'node-pre-gyp rebuild --runtime=node-webkit --target=0.12.2'
 ], {cwd: 'node_modules/serialport'}))
+
+gulp.task('bower-install', shell.task([
+  'node_modules/.bin/bower install'
+, 'node_modules/.bin/bower-installer'
+]))
 
 gulp.task('build', function () {
   var nw = new NwBuilder({
@@ -38,6 +45,4 @@ gulp.task('run', function () {
     if (err) console.log(err)
     else console.log('done')
   })
-
-
 })

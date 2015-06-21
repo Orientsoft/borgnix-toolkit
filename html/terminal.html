@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style media="screen">
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="js/lib/hterm_all.js">
+    </script>
+    <div style="width:100%;height:100%" id="terminal">
+
+    </div>
+    <script>
+    hterm.defaultStorage = new lib.Storage.Local()
+    var t = new hterm.Terminal()
+    t.decorate(document.getElementById('terminal'));
+    t.setCursorPosition(0, 0);
+    t.setCursorVisible(true);
+    t.setWidth(80)
+    t.setHeight(24)
+    t.prefs_.set('ctrl-c-copy', true);
+    t.prefs_.set('use-default-window-copy', true);
+    t.prefs_.set('font-family', '"Lucida Console", monospace')
+    </script>
+  </body>
+</html>

@@ -19,5 +19,14 @@
     "react-bootstrap": "~0.23.4",
     "bootstrap": "~3.3.5",
     "requirejs": "~2.1.18"
+  },
+  "install": {
+    "path": "vendor",
+    "sources": {
+      "bootstrap": [
+        "bower_components/bootstrap/dist/css/bootstrap.min.css",
+        "bower_components/bootstrap/dist/js/bootstrap.js"
+      ]
+    }
   }
 }

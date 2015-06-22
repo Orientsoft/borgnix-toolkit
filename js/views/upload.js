@@ -28,7 +28,7 @@ var SerialPort = requireNode('serialport')
 class PortList extends React.Component {
   render() {
     return (
-      <Input id={this.props.id} type="select" style={{width: '50%'}}>
+      <Input id={this.props.id} type="select" style={{width: '50%'}} label="upload">
         {this.props.ports.map(function (port) {
           return <option value={port.comName}>{port.comName}</option>
         })}
@@ -43,11 +43,13 @@ var uploadView = {
     borgutil.getPorts(function (ports) {
       React.render(
         <div className="container-fluid">
-          <p>Upload serialport</p>
           <PortList id="upload-port" ports={ports} />
-          <p>Upload file</p>
-          <Input type="file" id="upload-file" />
+          <Input type="file" id="upload-file" label="upload file"/>
+          <ButtonToolbar>
           <Button onClick={self.upload}>Upload</Button>
+          <Button onClick={self.test}>Test</Button>
+          </ButtonToolbar>
+          <Input type="textarea" id="upload-console" rows={10}></Input>
         </div>
 
       , $('#upload-container')[0]
@@ -59,6 +61,8 @@ var uploadView = {
     var self = uploadView
     var filename = $('#upload-file').val()
       , port = $('#upload-port').val()
+
+    self.log('Uploading ' + filename + ' to ' + port + '...')
 
     var board = {
       name: "Arduino Uno",
@@ -76,21 +80,59 @@ var uploadView = {
         baudrate: board.baud
       })
 
-      uploadPort.on('open', function(){
-        Stk500.bootload(uploadPort, hex, board, function(error){
-          uploadPort.close(function (error) {
-            if (error) console.log(error)
-            else console.log('upload finish')
+      uploadPort.on('open', function () {
+        borgutil.resetSerialPort(uploadPort, function () {
+          Stk500.bootload(uploadPort, hex, board, function(error){
+            if (error) {
+              self.log('Upload failed.')
+              self.log(error)
+            }
+            uploadPort.close(function (error) {
+              if (error) console.log(error)
+              else {
+                console.log('upload finish')
+                self.log('Upload finished')
+              }
+            })
           })
         })
       })
     }
     catch (e) {
       console.log(e)
+      self.log(e)
     }
   }
 
-, debugPort: null
+, test: function () {
+    var port = $('#upload-port').val()
+      , self = uploadView
+
+    var board = {
+      name: "Arduino Uno",
+      baud: 115200,
+      signature: new Buffer([0x1e, 0x95, 0x0f]),
+      pageSize: 128,
+      timeout: 400
+    }
+
+    self.log('Uploading test program...')
+
+    borgutil.uploadHex(port, 'hex/hello_borgnix.hex', board, function (err) {
+      if (err) console.log(err)
+      else {
+        console.log('test uploaded', self)
+        self.log('Test program uploaded. You should see the LED light on your'
+          + ' arduino flashing.'
+        )
+      }
+    })
+  }
+
+, log: function (content) {
+    var $textarea = $('#upload-console')
+    $textarea.append(content+'\n')
+  }
 
 }
 

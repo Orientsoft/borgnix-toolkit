@@ -5,14 +5,13 @@ import debugView from 'es6!js/views/debug'
 import hterm from 'hterm'
 import io from 'socketio'
 
-console.log(hterm)
-
 var app = {
   init: function () {
     // testView.init()
     uploadView.init()
     navbarView.init()
     debugView.init()
+    // arduinoView.init('#terminal-container')
 
     // hterm.defaultStorage = new lib.Storage.Local()
     // var t = new hterm.Terminal()

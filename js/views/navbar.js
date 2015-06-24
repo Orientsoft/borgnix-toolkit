@@ -10,7 +10,7 @@ var Nav = ReactBs.Nav
 class AppNav extends React.Component {
   render() {
     return (
-    <Navbar brand='Borgnix' toggleNavKey={2}>
+    <Navbar brand='Borgnix' toggleNavKey={2} fixedTop>
       <Nav eventKey={2}>
         <NavItem eventKey={1} id='show-upload' onClick={function () {
           $('#upload-container').show()

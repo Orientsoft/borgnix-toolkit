@@ -3,6 +3,8 @@ var gulp = require('gulp')
   , os = require('os')
   , shell = require('gulp-shell')
   , _ = require('underscore')
+  , del = require('del')
+  , minimist = require('minimist')
 
 function getPlatform () {
   var arch = (os.arch().indexOf('64') != -1 ? '64' : '32')
@@ -12,6 +14,12 @@ function getPlatform () {
   return 'linux' + arch
 }
 
+var argv = minimist(process.argv.slice(2))
+
+var isWin = /^win/.test(process.platform)
+var badSlash = isWin ? '/' : '\\'
+var goodSlash = isWin ? /\\/g : /\//g
+
 gulp.task('install', ['node-rebuild', 'bower-install'])
 
 gulp.task('node-rebuild', shell.task([
@@ -19,8 +27,8 @@ gulp.task('node-rebuild', shell.task([
 ], {cwd: 'node_modules/serialport'}))
 
 gulp.task('bower-install', shell.task([
-  'node_modules/.bin/bower install'
-, 'node_modules/.bin/bower-installer'
+  'node_modules/.bin/bower install'.replace(badSlash, goodSlash)
+, 'node_modules/.bin/bower-installer'.replace(badSlash, goodSlash)
 ]))
 
 gulp.task('prebuild', function () {
@@ -28,27 +36,26 @@ gulp.task('prebuild', function () {
   var setting = require('./package.json')
     , deps = '*(' + _.keys(setting.dependencies).join('|') + ')'
   gulp.src('./node_modules/'+deps+'/**')
-      .pipe(gulp.dest('test/node_modules'))
+      .pipe(gulp.dest('temp/node_modules'))
 
   // copy needed folders
   var folders = [ 'config', 'css', 'js', 'node', 'vendor']
   gulp.src('./*('+folders.join('|')+')/**')
-      .pipe(gulp.dest('test'))
+      .pipe(gulp.dest('temp'))
 
   // copy needed files in root
   var files = [ 'index.html', 'package.json', 'LICENSE']
   gulp.src('./*(' + files.join('|') + ')')
-      .pipe(gulp.dest('test'))
+      .pipe(gulp.dest('temp'))
 })
 
-gulp.task('clean', shell.task([
-  'rm -rf build'
-, 'rm -rf test'
-]))
+gulp.task('clean', function () {
+  del(['build', 'temp'])
+})
 
 gulp.task('build', function () {
   var nw = new NwBuilder({
-    files: './test/**'
+    files: './temp/**'
   , platforms: [getPlatform()]
   , version: '0.12.2'
   })
@@ -56,7 +63,21 @@ gulp.task('build', function () {
   nw.build(function (err) {
     if (err) console.log(err)
     else console.log('done')
-    
+
+  })
+})
+
+gulp.task('build-all', function () {
+  var nw = new NwBuilder({
+    files: './temp/**'
+  , platforms: ['win']
+  , version: '0.12.2'
+  })
+
+  nw.build(function (err) {
+    if (err) console.log(err)
+    else console.log('done')
+
   })
 })
 
@@ -73,5 +94,5 @@ gulp.task('run', function () {
 })
 
 gulp.task('default', function () {
-  console.log();
+  console.log(argv);
 })

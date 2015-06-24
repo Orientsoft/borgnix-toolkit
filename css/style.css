@@ -5,3 +5,7 @@
 .navbar-collapse {
   overflow: hidden;
 }
+
+body {
+  margin-top: 70px;
+}

@@ -29,7 +29,7 @@ var DebugView = React.createClass({
     var baudrates = [9600, 115200]
 
     return (
-      <div className="container-fluid">
+      <div className="container-fluid" style={{marginTop: 10}}>
         <Panel header={this.props.port}>
 
         <Input id="debug-output" type="textarea" rows={10} onChange={function (e) {
@@ -39,7 +39,8 @@ var DebugView = React.createClass({
           <Button onClick={this.debug}>Debug</Button>
           <Button onClick={this.stopDebug}>Stop</Button>
           <Button onClick={this.clear}>Clear</Button>
-          <Input id="debug-baudrate" type="select" style={{width: 100, display: 'inline', 'float': 'right'}}>
+          <Input id="debug-baudrate" type="select"
+                 style={{width: 100, display: 'inline', 'float': 'right'}}>
             {baudrates.map(genOpt)}
           </Input>
         </ButtonToolbar>

@@ -26,10 +26,10 @@ var app = {
     // t.prefs_.set('font-family', '"Lucida Console", monospace')
     // t.runCommandClass(NBssh)
     // this.startSocketIo(3002)
-    var testio = io.connect('http://127.0.0.1:3002')
-    testio.on('hello', function (data) {
-      console.log('good');
-    })
+    // var testio = io.connect('http://127.0.0.1:3002')
+    // testio.on('hello', function (data) {
+    //   console.log('good');
+    // })
 
   }
 }

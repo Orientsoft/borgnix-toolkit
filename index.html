@@ -16,8 +16,11 @@
   <div id="debug-container" class="container-fluid"></div>
 
   <script>
+    var gui = require('nw.gui')
+      , win = gui.Window.get()
     window.requireNode = window.require
     window.require = undefined
+
   </script>
   <script src="vendor/requirejs/require.js"
           data-main="js/main.js"></script>

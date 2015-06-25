@@ -28,7 +28,8 @@ var SerialPort = requireNode('serialport')
 class PortList extends React.Component {
   render() {
     return (
-      <Input id={this.props.id} type="select" style={{width: '50%'}} label="upload">
+      <Input id={this.props.id} type="select" style={{width: '50%'}} label="upload"
+             labelClassName='col-xs-2' wrapperClassName='col-xs-10'>
         {this.props.ports.map(function (port) {
           return <option value={port.comName}>{port.comName}</option>
         })}
@@ -43,12 +44,19 @@ var uploadView = {
     borgutil.getPorts(function (ports) {
       React.render(
         <div className="container-fluid">
+          <form className='form-horizontal'>
           <PortList id="upload-port" ports={ports} />
-          <Input type="file" id="upload-file" label="upload file"/>
+          <Input type="file" id="upload-file" label="upload file"
+                 labelClassName='col-xs-2' wrapperClassName='col-xs-10'/>
+
           <ButtonToolbar>
           <Button onClick={self.upload}>Upload</Button>
           <Button onClick={self.test}>Test</Button>
+          <Button onClick={function () {
+            win.reload()
+          }}>Refresh</Button>
           </ButtonToolbar>
+          </form>
           <Input type="textarea" id="upload-console" rows={10}></Input>
         </div>
 

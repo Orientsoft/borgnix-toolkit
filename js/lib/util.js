@@ -14,7 +14,7 @@ var borgutil = {
     port.set({rts: true, dtr: true}, function (err) {
       setTimeout(function () {
         port.set({rts: false, dtr: false}, function (err) {
-          cb(err)
+          if (_.isFunction(cb)) cb(err)
         })
       }, 100)
     })

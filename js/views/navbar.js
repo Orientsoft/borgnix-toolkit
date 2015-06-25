@@ -5,13 +5,13 @@ import ReactBs from 'react-bs'
 var Nav = ReactBs.Nav
   , Navbar = ReactBs.Navbar
   , NavItem = ReactBs.NavItem
-
+  , Button = ReactBs.Button
 
 class AppNav extends React.Component {
   render() {
     return (
     <Navbar brand='Borgnix' toggleNavKey={2} fixedTop>
-      <Nav eventKey={2}>
+      <Nav right eventKey={2}>
         <NavItem eventKey={1} id='show-upload' onClick={function () {
           $('#upload-container').show()
           $('#debug-container').hide()

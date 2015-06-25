@@ -39,7 +39,7 @@ gulp.task('prebuild', function () {
       .pipe(gulp.dest('temp/node_modules'))
 
   // copy needed folders
-  var folders = [ 'config', 'css', 'js', 'node', 'vendor']
+  var folders = [ 'config', 'css', 'js', 'node', 'vendor', 'hex']
   gulp.src('./*('+folders.join('|')+')/**')
       .pipe(gulp.dest('temp'))
 

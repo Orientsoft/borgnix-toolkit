@@ -50,9 +50,9 @@ var uploadView = {
                  labelClassName='col-xs-2' wrapperClassName='col-xs-10'/>
 
           <ButtonToolbar>
-          <Button onClick={self.upload}>Upload</Button>
-          <Button onClick={self.test}>Test</Button>
-          <Button onClick={function () {
+          <Button bsStyle='primary' onClick={self.upload}>Upload</Button>
+          <Button bsStyle='primary' onClick={self.test}>Test</Button>
+          <Button bsStyle='primary' onClick={function () {
             win.reload()
           }}>Refresh</Button>
           </ButtonToolbar>

@@ -9,12 +9,15 @@ require.config({
   , 'react-bs': 'vendor/react-bootstrap/react-bootstrap'
   , hterm: 'js/lib/hterm_all'
   , 'socketio': 'node_modules/socket.io/node_modules/socket.io-client/socket.io'
+  , 'material': 'vendor/bootstrap-material-design/material'
   }
 , shim: {
     hterm: {exports: 'hterm'}
+  , material: ['jquery']
   }
 })
 
-require(['es6!js/app'], function (app) {
+require(['jquery', 'es6!js/app', 'material'], function ($, app) {
+  $.material.init()
   app.init()
 })

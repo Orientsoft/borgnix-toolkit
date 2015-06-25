@@ -36,9 +36,9 @@ var DebugView = React.createClass({
           console.log(e.target.value)
         }} />
         <ButtonToolbar>
-          <Button onClick={this.debug}>Debug</Button>
-          <Button onClick={this.stopDebug}>Stop</Button>
-          <Button onClick={this.clear}>Clear</Button>
+          <Button bsStyle='primary' onClick={this.debug}>Debug</Button>
+          <Button bsStyle='primary' onClick={this.stopDebug}>Stop</Button>
+          <Button bsStyle='primary' onClick={this.clear}>Clear</Button>
           <Input id="debug-baudrate" type="select"
                  style={{width: 100, display: 'inline', 'float': 'right'}}>
             {baudrates.map(genOpt)}

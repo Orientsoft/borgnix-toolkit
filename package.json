@@ -4,6 +4,30 @@
   "description": "",
   "main": "index.html",
   "node-main": "node/socketio-server",
+  "window": {
+    "frame": true,
+    "toolbar": true
+  },
+  "platformOverrides": {
+    "osx": {
+      "window": {
+        "frame": true,
+        "toolbar": false
+      }
+    },
+    "win": {
+      "window": {
+        "frame": true,
+        "toolbar": false
+      }
+    },
+    "linux": {
+      "window": {
+        "frame": true,
+        "toolbar": false
+      }
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "gulp install"

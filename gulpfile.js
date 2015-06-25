@@ -17,8 +17,8 @@ function getPlatform () {
 var argv = minimist(process.argv.slice(2))
 
 var isWin = /^win/.test(process.platform)
-var badSlash = isWin ? '/' : '\\'
-var goodSlash = isWin ? /\\/g : /\//g
+var goodSlash = isWin ? '\\' : '/'
+var badSlash = isWin ? /\//g : /\\/g
 
 gulp.task('install', ['node-rebuild', 'bower-install'])
 
@@ -54,30 +54,23 @@ gulp.task('clean', function () {
 })
 
 gulp.task('build', function () {
-  var nw = new NwBuilder({
+  var option = {
     files: './temp/**'
-  , platforms: [getPlatform()]
   , version: '0.12.2'
-  })
+  }
+
+  if (argv.p) {
+    option.platforms = [argv.p]
+  }
+  else {
+    option.platforms = [getPlatform()]
+  }
+
+  var nw = new NwBuilder(option)
 
   nw.build(function (err) {
     if (err) console.log(err)
     else console.log('done')
-
-  })
-})
-
-gulp.task('build-all', function () {
-  var nw = new NwBuilder({
-    files: './temp/**'
-  , platforms: ['win']
-  , version: '0.12.2'
-  })
-
-  nw.build(function (err) {
-    if (err) console.log(err)
-    else console.log('done')
-
   })
 })
 

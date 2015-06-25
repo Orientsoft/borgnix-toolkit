@@ -28,8 +28,9 @@ var SerialPort = requireNode('serialport')
 class PortList extends React.Component {
   render() {
     return (
-      <Input id={this.props.id} type="select" style={{width: '50%'}} label="upload"
-             labelClassName='col-xs-2' wrapperClassName='col-xs-10'>
+      <Input id={this.props.id} type="select" style={{width: '50%'}}
+             label="Serial Port" labelClassName='col-xs-2'
+             wrapperClassName='col-xs-10'>
         {this.props.ports.map(function (port) {
           return <option value={port.comName}>{port.comName}</option>
         })}
@@ -46,7 +47,7 @@ var uploadView = {
         <div className="container-fluid">
           <form className='form-horizontal'>
           <PortList id="upload-port" ports={ports} />
-          <Input type="file" id="upload-file" label="upload file"
+          <Input type="file" id="upload-file" label="Hex File"
                  labelClassName='col-xs-2' wrapperClassName='col-xs-10'/>
 
           <ButtonToolbar>

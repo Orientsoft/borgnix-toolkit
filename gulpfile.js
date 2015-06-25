@@ -22,9 +22,14 @@ var badSlash = isWin ? /\//g : /\\/g
 
 gulp.task('install', ['node-rebuild', 'bower-install'])
 
+var flags = ''
+if (argv.a) flags += ' --target_arch=' + argv.a
+if (argv.p) flags += ' --target_platform=' + argv.p
+if (argv.d) serialportDir = 'node_modules/serialport'
+else serialportDir = 'temp/node_modules/serialport'
 gulp.task('node-rebuild', shell.task([
-  'node-pre-gyp rebuild --runtime=node-webkit --target=0.12.2'
-], {cwd: 'node_modules/serialport'}))
+  'node-pre-gyp rebuild --runtime=node-webkit --target=0.12.2' + flags
+], {cwd: serialportDir}))
 
 gulp.task('bower-install', shell.task([
   'node_modules/.bin/bower install'.replace(badSlash, goodSlash)

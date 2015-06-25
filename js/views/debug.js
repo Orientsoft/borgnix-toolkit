@@ -26,7 +26,8 @@ var DebugView = React.createClass({
       return <option value={value} >{value}</option>
     }
 
-    var baudrates = [9600, 115200]
+    var baudrates = [ 300, 1200, 2400, 4800, 9600
+                    , 19200, 19200, 38400, 57600, 115200, 230400, 250000]
 
     return (
       <div className="container-fluid" style={{marginTop: 10}}>

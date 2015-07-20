@@ -3,7 +3,6 @@
   <meta charset="UTF-8">
   <title>Borgnix-Toolkit</title>
   <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
-  <link rel="stylesheet" href="vendor/bootstrap-material-design/material.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,10 +15,13 @@
     var gui = require('nw.gui')
       , win = gui.Window.get()
     window.requireNode = window.require
-    window.require = undefined
-
+    global.gui = gui
+    global.document= window.document
+    global.navigator= window.navigator
+    // window.require = undefined
+    require('./convert/main')
   </script>
-  <script src="vendor/requirejs/require.js"
-          data-main="js/main.js"></script>
+
+
 </body>
 </html>

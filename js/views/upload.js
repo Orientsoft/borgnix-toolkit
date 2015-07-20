@@ -4,6 +4,8 @@ import _ from 'underscore'
 import ReactBs from 'react-bs'
 import DebugView from 'es6!js/views/debug'
 import borgutil from 'es6!js/lib/util'
+import BAC from 'es6!js/node_modules/arduino-compiler/client'
+import BPM from 'es6!js/node_modules/borgnix-project-manager/client'
 
 var Input = ReactBs.Input
   , Button = ReactBs.Button
@@ -24,6 +26,30 @@ var SerialPort = requireNode('serialport')
   , Stk500 = requireNode('stk500')
   , fs = requireNode('fs')
 
+var bac = new BAC({
+  host: 'http://127.0.0.1:3000'
+, prefix: '/c'
+})
+
+var bpm = new BPM({
+  host: 'http://127.0.0.1:3000'
+, prefix: '/p'
+})
+
+// bac.findHex({
+//   uuid: 'uuid'
+// , token: 'token'
+// , type: 'arduino'
+// , name: 'aaa'
+// }, function (send) {
+//   console.log(send)
+// })
+//
+// console.log(bpm)
+//
+// bpm.listProject({uuid: 'uuid', token:'token', type:'arduino'}, function (projects) {
+//   console.log(projects)
+// })
 
 class PortList extends React.Component {
   render() {
@@ -39,35 +65,71 @@ class PortList extends React.Component {
   }
 }
 
-var uploadView = {
-  init: function () {
+class CloudHexList extends React.Component {
+  render () {
+    return (
+      <Input type='select' id={this.props.id} label='Cloud Hex File'
+             labelClassName='col-xs-2' wrapperClassName='col-xs-10'>
+        {
+          this.props.projects.map(function (project) {
+            return <option value={project.name}>{project.name + '.hex'}</option>
+          })
+        }
+      </Input>
+    )
+  }
+}
+
+class Upload extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      ports: []
+    , projects: []
+    }
+  }
+
+  componentDidMount() {
     var self = this
     borgutil.getPorts(function (ports) {
-      React.render(
-        <div className="container-fluid">
-          <form className='form-horizontal'>
-          <PortList id="upload-port" ports={ports} />
-          <Input type="file" id="upload-file" label="Hex File"
-                 labelClassName='col-xs-2' wrapperClassName='col-xs-10'/>
+      self.setState({
+        ports: ports
+      })
+    })
 
-          <ButtonToolbar>
-          <Button bsStyle='primary' onClick={self.upload}>Upload</Button>
-          <Button bsStyle='primary' onClick={self.test}>Test</Button>
-          <Button bsStyle='primary' onClick={function () {
-            win.reload()
-          }}>Refresh</Button>
-          </ButtonToolbar>
-          </form>
-          <Input type="textarea" id="upload-console" rows={10}></Input>
-        </div>
-
-      , $('#upload-container')[0]
-      )
+    bpm.listProject({uuid: 'uuid', token:'token', type:'arduino'}, function (projects) {
+      self.setState({
+        projects: projects
+      })
     })
   }
 
-, upload: function () {
-    var self = uploadView
+  render() {
+    return (
+      <div className="container-fluid">
+        <form className='form-horizontal'>
+        <PortList id="upload-port" ports={this.state.ports} />
+        <Input type="file" id="upload-file" label="Hex File"
+               labelClassName='col-xs-2' wrapperClassName='col-xs-10'/>
+
+        <CloudHexList id='upload-cloud-file' projects={this.state.projects}></CloudHexList>
+        <Button onClick={this.downloadHex.bind(this)}>Download Cloud File</Button>
+
+        <ButtonToolbar>
+        <Button bsStyle='primary' onClick={this.upload.bind(this)}>Upload</Button>
+        <Button bsStyle='primary' onClick={this.test.bind(this)}>Test</Button>
+        <Button bsStyle='primary' onClick={function () {
+          win.reload()
+        }}>Refresh</Button>
+        </ButtonToolbar>
+        </form>
+        <Input type="textarea" id="upload-console" rows={10}></Input>
+      </div>
+    )
+  }
+
+  upload() {
+    var self = this
     var filename = $('#upload-file').val()
       , port = $('#upload-port').val()
 
@@ -113,9 +175,10 @@ var uploadView = {
     }
   }
 
-, test: function () {
+  test() {
+    // console.log(this)
     var port = $('#upload-port').val()
-      , self = uploadView
+      , self = this
 
     var board = {
       name: "Arduino Uno",
@@ -138,11 +201,17 @@ var uploadView = {
     })
   }
 
-, log: function (content) {
+  log(content) {
     var $textarea = $('#upload-console')
     $textarea.append(content+'\n')
   }
 
+  downloadHex() {
+    bac.findHex({uuid: 'uuid', token: 'token', name:$('#upload-cloud-file').val(), type: 'arduino'}, function (send) {
+      // console.log('I got this', send)
+      console.log($('#download-frame').attr('src', send.url))
+    })
+  }
 }
 
-export default uploadView
+export default Upload

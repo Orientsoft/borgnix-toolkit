@@ -17,7 +17,7 @@ require.config({
   }
 })
 
-require(['jquery', 'es6!js/app', 'material'], function ($, app) {
+require(['jquery', 'es6!js/app', 'react', 'material'], function ($, app, React) {
   $.material.init()
   app.init()
 })

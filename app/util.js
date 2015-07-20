@@ -1,7 +1,9 @@
-var SerialPort = requireNode('serialport')
-  , fs = requireNode('fs')
-  , intel_hex = requireNode('intel-hex')
-  , Stk500 = requireNode('stk500')
+var SerialPort = require('serialport')
+  , fs = require('fs')
+  , intel_hex = require('intel-hex')
+  , Stk500 = require('stk500')
+  , _ = require('underscore')
+
 
 var borgutil = {
   getPorts: function (cb) {

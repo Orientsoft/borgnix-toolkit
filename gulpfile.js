@@ -5,6 +5,14 @@ var gulp = require('gulp')
   , _ = require('underscore')
   , del = require('del')
   , minimist = require('minimist')
+  , babel = require('gulp-babel')
+  , watch = require('gulp-watch')
+
+  , browserify = require('browserify')
+  , babelify = require('babelify')
+  , watchify = require('watchify')
+  , source = require('vinyl-source-stream')
+  , concat = require('gulp-concat')
 
 function getPlatform () {
   var arch = (os.arch().indexOf('64') != -1 ? '64' : '32')
@@ -89,6 +97,53 @@ gulp.task('run', function () {
     if (err) console.log(err)
     else console.log('done')
   })
+})
+
+gulp.task('es6', function () {
+  watch('app/**/*.js', function () {
+    console.log('file changed')
+    gulp.src('app/**/*.js')
+        .pipe(babel().on('error', function (err) {
+          console.error(err)
+        }))
+        .pipe(gulp.dest('convert'))
+  })
+    .on('error', function (err) {
+      console.error(err)
+    })
+})
+
+gulp.task('browserify', function () {
+  var bundler = browserify({
+    entries: ['./app/main.js']
+  , transform: [babelify]
+  , debug: true
+  , cache: {}
+  , packageCache: {}
+  , fullPaths: true
+  })
+
+  var watcher = watchify(bundler)
+
+  return watcher
+    .on('update', function () { // When any files update
+        var updateStart = Date.now()
+        console.log('Updating!')
+        watcher.bundle()// Create new bundle that uses the cache for high performance
+        .on('error', function (err) {
+          console.error(err.stack)
+        })
+        .pipe(source('main.js'))
+    // This is where you add uglifying etc.
+        .pipe(gulp.dest('convert'))
+        console.log('Updated!', (Date.now() - updateStart) + 'ms')
+    })
+    .bundle() // Create the initial bundle when starting the task
+    .on('error', function (err) {
+      console.error(err.stack || err)
+    })
+    .pipe(source('main.js'))
+    .pipe(gulp.dest('convert'))
 })
 
 gulp.task('default', function () {

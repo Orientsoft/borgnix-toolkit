@@ -20,30 +20,30 @@ var Input = ReactBs.Input
 var SerialPort = requireNode('serialport')
   , async = requireNode('async')
 
-var DebugView = React.createClass({
+var DebugPane = React.createClass({
   render() {
     function genOpt(value) {
       return <option value={value} >{value}</option>
     }
 
     var baudrates = [ 300, 1200, 2400, 4800, 9600
-                    , 19200, 19200, 38400, 57600, 115200, 230400, 250000]
+                    , 19200, 38400, 57600, 115200, 230400, 250000]
 
     return (
       <div className="container-fluid" style={{marginTop: 10}}>
         <Panel header={this.props.port}>
 
-        <Input id="debug-output" type="textarea" rows={10} onChange={function (e) {
+        <Input id="debug-output" type="textarea" onChange={function (e) {
           console.log(e.target.value)
-        }} />
+        }}  rows={10}/>
         <ButtonToolbar>
+          <Input id="debug-baudrate" type="select"
+                 style={{width: 100, display: 'inline-block'}}>
+            {baudrates.map(genOpt)}
+          </Input>
           <Button bsStyle='primary' onClick={this.debug}>Debug</Button>
           <Button bsStyle='primary' onClick={this.stopDebug}>Stop</Button>
           <Button bsStyle='primary' onClick={this.clear}>Clear</Button>
-          <Input id="debug-baudrate" type="select"
-                 style={{width: 100, display: 'inline', 'float': 'right'}}>
-            {baudrates.map(genOpt)}
-          </Input>
         </ButtonToolbar>
         </Panel>
 
@@ -101,28 +101,39 @@ var DebugView = React.createClass({
   }
 })
 
-var debugView = {
-  init: function () {
+class Debug extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      ports: []
+    }
+  }
+
+  componentDidMount() {
     var self = this
     borgutil.getPorts(function (ports) {
-      // serialPorts = ports
-      var panes = []
-      for (var i in ports) {
-        console.log(i)
-        panes.push(
-          <TabPane eventKey={parseInt(i)+1} tab={'serial '+(parseInt(i)+1)}>
-            <DebugView port={ports[i].comName} />
-          </TabPane>
-        )
-      }
-      React.render(
-        <TabbedArea defaultActiveKey={1}>
-          {panes}
-        </TabbedArea>
-      , $('#debug-container')[0]
-      )
+      self.setState({
+        ports: ports
+      })
     })
+  }
+
+  render() {
+    var self = this
+    return (
+      <TabbedArea defaultActiveKey={1}>
+        {
+          this.state.ports.map(function (port, i) {
+            return (
+              <TabPane eventKey={parseInt(i)+1} tab={'serial '+(parseInt(i)+1)}>
+                <DebugPane port={port.comName} />
+              </TabPane>
+            )
+          })
+        }
+      </TabbedArea>
+    )
   }
 }
 
-export default debugView
+export default Debug

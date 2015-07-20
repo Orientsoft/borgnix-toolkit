@@ -1,16 +1,25 @@
 import testView from 'es6!js/views/test'
-import uploadView from 'es6!js/views/upload'
+import Upload from 'es6!js/views/upload'
 import navbarView from 'es6!js/views/navbar'
-import debugView from 'es6!js/views/debug'
+import Debug from 'es6!js/views/debug'
 import hterm from 'hterm'
 import io from 'socketio'
+import React from 'react'
+import $ from 'jquery'
+import ReactBs from 'react-bs'
+
+const TabbedArea = ReactBs.TabbedArea
+    , TabPane = ReactBs.TabPane
 
 var app = {
   init: function () {
     // testView.init()
-    uploadView.init()
-    navbarView.init()
-    debugView.init()
+    // uploadView.init()
+    // navbarView.init()
+    // debugView.init()
+    // React.render(<Upload />, $('#upload-container')[0])
+    // React.render(<Debug />, $('#debug-container')[0])
+    React.render(<App />, $('#debug-container')[0])
     // arduinoView.init('#terminal-container')
 
     // hterm.defaultStorage = new lib.Storage.Local()
@@ -31,6 +40,25 @@ var app = {
     //   console.log('good');
     // })
 
+  }
+}
+
+class App extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+      <TabbedArea defaultActiveKey={1}>
+        <TabPane eventKey={1} tab='Upload *'>
+          <Upload />
+        </TabPane>
+        <TabPane eventKey={2} tab='Debug *'>
+          <Debug />
+        </TabPane>
+      </TabbedArea>
+    )
   }
 }
 

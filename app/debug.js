@@ -39,10 +39,11 @@ class Debug extends React.Component {
   render() {
     return (
       <div className='no-select'>
-        <h1>debug</h1>
+        <Tabs tabWidth={75}  tabItemContainerStyle={{width: 150}}>
+          <Tab label='tab 1'>111</Tab>
+          <Tab label='tab 2'>222</Tab>
+        </Tabs>
       </div>
-
-
     )
   }
 

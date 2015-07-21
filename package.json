@@ -45,6 +45,7 @@
   "homepage": "https://github.com/Orientsoft/borgnix-toolkit#readme",
   "dependencies": {
     "async": "^1.2.1",
+    "colors": "^1.1.2",
     "intel-hex": "^0.1.1",
     "jquery": "^2.1.4",
     "material-design-icons": "^2.0.0",

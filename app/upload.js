@@ -4,16 +4,19 @@ import _ from 'underscore'
 import {
   Styles, RaisedButton, SelectField, DropDownMenu, AppBar, Tab, Tabs
 , Toolbar, ToolbarGroup, IconButton, ToolbarTitle, Dialog, TextField
-, List, ListItem, FontIcon
+, List, ListItem, FontIcon, FlatButton
 } from 'material-ui'
+import MenuItem from 'material-ui/lib/menus/menu-item'
+import IconMenu from 'material-ui/lib/menus/icon-menu'
 import butil from './util'
-import Terminal from './terminal'
+import Terminals from './terminals'
 import pubsub from 'pubsub-js'
 import ThemeManager from './theme'
 import MIconButton from './material-icon-button'
 import db from './db'
+import {SerialPort} from 'serialport'
 
-var baudrates = [
+let baudrates = [
   300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 250000
 ]
 
@@ -39,10 +42,8 @@ function newPortAction(self) {
           , alias: newPortAlias
           }])
         , ports: this.state.ports.map(function (port) {
-            // console.log(port.name, newPortName)
             if (port.name === newPortName)
               port.alias = newPortAlias
-            // console.log(port)
             return port
           })
         , selectedPort: null
@@ -50,6 +51,11 @@ function newPortAction(self) {
             name: newPortName
           , alias: newPortAlias
           }
+        })
+
+        this.refs.terms.add({id: newPortAlias})
+        this.refs.terms.setState({
+          activeTerm: {id: newPortAlias}
         })
 
         this.refs.newPortDialog.dismiss()
@@ -61,6 +67,7 @@ function newPortAction(self) {
 class Upload extends React.Component {
   constructor(props) {
     super(props)
+    this.serialPort = []
     this.state = {
       ports: []
     , selectedPort: null
@@ -83,11 +90,18 @@ class Upload extends React.Component {
       , height: $(React.findDOMNode(self)).parent().height() - 64
       , footerHeight: $(React.findDOMNode(self.refs.terminalFooter)).height()
       })
+
+      // force the window to resize so the terminal div resize properly
+      let win = gui.Window.get()
+        , w = win.width
+        , h = win.height
+      win.resizeTo( w, h+1)
+      win.resizeTo( w, h)
     })
 
     $(window).resize(function () {
       self.setState({
-        height: $(React.findDOMNode(self)).parent().height()-64
+        height: $(React.findDOMNode(self)).parent().height() - 64
       })
     })
   }
@@ -99,15 +113,6 @@ class Upload extends React.Component {
   }
 
   render() {
-    let ab = (
-      <IconButton
-          onTouchTap={function () {
-
-          }}
-          iconClassName="material-icons">
-        close
-      </IconButton>
-    )
     let self = this
     return (
       <div className='no-select'>
@@ -123,20 +128,12 @@ class Upload extends React.Component {
                   <ListItem
                       ref={ref}
                       primaryText={port.alias}
-                      leftIcon={( self.state.activePort.name === port.name
-                                ? <FontIcon className='material-icons'>done</FontIcon>
-                                : <FontIcon className='material-icons'></FontIcon>)}
-                      rightIconButton={
-                        <IconButton
-                            onTouchTap={function (ref, e) {
-                              console.log(this.refs[ref])
-                              let portAlias = this.refs[ref].props.primaryText
-
-                            }.bind(this, ref)}
-                            iconClassName="material-icons">
-                          close
-                        </IconButton>
-                      }
+                      leftIcon={<FontIcon className='material-icons'>
+                                  {( self.state.activePort.name === port.name
+                                  ? 'done'
+                                  : '')}
+                                </FontIcon>}
+                      rightIconButton={self._rightIconMenu(ref)}
                       onTouchTap={(ref, e)=>{
                         let portAlias = this.refs[ref].props.primaryText
                         let targetPort = _.find(this.state.dockedPorts, function (port) {
@@ -144,6 +141,9 @@ class Upload extends React.Component {
                         })
                         this.setState({
                           activePort: targetPort
+                        })
+                        this.refs.terms.setState({
+                          activeTerm: {id: portAlias}
                         })
                       }.bind(this, ref)}/>
                 )
@@ -155,7 +155,7 @@ class Upload extends React.Component {
                 onTouchTap={this._showDialog.bind(this, 'newPortDialog')}/>
             <MIconButton
                 icon='play_arrow'
-                onTouchTap={()=>{pubsub.publish('console_output', Date.now())}}/>
+                onTouchTap={this._openPort.bind(this)}/>
             <MIconButton
                 icon='file_upload'
                 onTouchTap={this._showDialog.bind(this, 'uploadDialog')}/>
@@ -165,12 +165,32 @@ class Upload extends React.Component {
         </div>
         <div
             className='col-sm-9'
-            style={{overflow: 'hidden', height: this.state.height}}>
-          <Terminal id='terminal' lineHeight={17}
-              style={{height: this.state.height - this.state.footerHeight}}/>
-          <div className='footer' ref='terminalFooter' style={{width: '100%'}}>
-            <TextField />
-            <RaisedButton label='send'></RaisedButton>
+            style={{ overflow: 'hidden'
+                   , height: this.state.height
+                   , paddingLeft: 0}}>
+          <Terminals
+              ref='terms' lineHeight={17}
+              style={{
+                height: this.state.height - this.state.footerHeight
+              , paddingLeft: 15
+              , paddingBottom: 15
+              }}
+              terms={[
+                {id: 'default'}
+              ]}/>
+          <div className='footer' ref='terminalFooter' style={{width: '100%' }}>
+            <TextField ref='serialInput' style={{
+              width: $(React.findDOMNode(this.refs.terminalFooter)).width() - 150
+            , paddingLeft: 15
+            }}/>
+            <FlatButton
+                label='send' secondary={true} ref='serialSend'
+                onTouchTap={function () {
+                  let sp = this.serialPort[this.state.activePort.name]
+                  sp.write(this.refs.serialInput.getValue()+'\n')
+                  this.refs.serialInput.clearValue()
+                }.bind(this)}
+                style={{left: 20}}/>
           </div>
         </div>
       </div>
@@ -222,9 +242,9 @@ class Upload extends React.Component {
 
       <Dialog
         ref='newPortDialog'
-        title="Upload"
+        title="New Port"
         actions={newPortAction(this)}>
-        <TextField ref='portAlias' />
+        <TextField ref='portAlias' floatingLabelText='name'/>
         <br/>
         <SelectField
           ref='portName'
@@ -249,6 +269,60 @@ class Upload extends React.Component {
 
   _showDialog(name) {
     this.refs[name].show()
+  }
+
+  _rightIconMenu(ref) {
+    return (
+      <IconMenu
+          iconButtonElement={
+            <MIconButton
+                touch={true}
+                tooltip="more"
+                icon='more_vert'
+                tooltipPosition="bottom-left"/>
+          }>
+        <MenuItem
+            primaryText='Remove'
+            onTouchTap={()=>{
+              let portAlias = this.refs[ref].props.primaryText
+              this.setState({
+                dockedPorts: this.state.dockedPorts.filter((port)=>{
+                  return port.alias !== portAlias
+                })
+              , ports: this.state.ports.map((port)=>{
+                  if (port.alias === portAlias) {
+                    return _.omit(port, 'alias')
+                  }
+                  return port
+                })
+              , activePort: _.find(this.state.dockedPorts, (port)=>{
+                  return port.alias !== portAlias
+                })
+              })
+            }}/>
+      </IconMenu>
+    )
+  }
+
+  _openPort() {
+    console.log(this.state.activePort)
+    let portName = this.state.activePort.name
+      , portAlias = this.state.activePort.alias
+
+
+    let sp = new SerialPort(portName, {baudrate: 115200})
+
+    this.serialPort[portName] = sp
+
+    sp.on('open', function () {
+      console.log(portName, 'opened')
+      sp.on('data', function (data) {
+        pubsub.publish('console_output_'+portAlias, data)
+      })
+      sp.on('error', function (err) {
+        publish.publish('console_output_'+portAlias, err)
+      })
+    })
   }
 }
 

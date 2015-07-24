@@ -14,7 +14,7 @@ class Terminals extends React.Component {
   render() {
     let self = this
     return (
-      <div>
+      <div onContextMenu={this.props.onContextMenu}>
         {
           this.state.terminals.map((term)=>{
             let display = {display: (self.state.activeTerm.id === term.id ? 'block' : 'none')}

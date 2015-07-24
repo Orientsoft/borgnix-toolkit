@@ -37,8 +37,13 @@ class TerminalComponent extends React.Component {
     })
   }
 
+  componentWillUnmount() {
+    // unbind dom event that will access the component when it's unmounted
+    $(window).unbind('resize')
+  }
+
   resize() {
-    var $elem = $(React.findDOMNode(this))
+    let $elem = $(React.findDOMNode(this))
       , width = parseInt($elem.width())
       , cols = Math.floor(width / 8)
       , height = parseInt($elem.height())

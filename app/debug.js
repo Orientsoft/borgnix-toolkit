@@ -6,6 +6,7 @@ import {
 } from 'material-ui'
 // import SerialPort from 'serialport'
 import butil from './util'
+import pubsub from 'pubsub-js'
 
 var ThemeManager = new Styles.ThemeManager()
 
@@ -20,6 +21,7 @@ class Debug extends React.Component {
 
   componentDidMount() {
     var self = this
+    pubsub.publish('change_title', 'Test')
     butil.getPorts(function (ports) {
       self.setState({
         ports: ports.map(function (port, i) {

@@ -15,7 +15,9 @@ const Route = Router.Route
 class App extends React.Component{
   constructor(props) {
     super(props)
-
+    this.state = {
+      title: 'Borgnix Toolkit'
+    }
   }
 
   getChildContext() {
@@ -24,11 +26,15 @@ class App extends React.Component{
     }
   }
 
+  componentDidUpdate() {
+    
+  }
+
   render() {
     return (
       <AppCanvas>
-        <MyNavBar/>
-        <RouteHandler />
+        <MyNavBar />
+        <RouteHandler ref='route'/>
       </AppCanvas>
     )
   }

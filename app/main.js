@@ -5,6 +5,14 @@ import Debug from './debug'
 import $ from 'jquery'
 import injectTapEventPlugin from "react-tap-event-plugin"
 import Router from 'react-router'
+import butil from './util'
+
+butil.setHost('https://dev.borgnix.com')
+
+// butil.login('huangyuelong@orientsoft.cn', 'welcome3', function (err, b) {
+//   if (err) console.log(err)
+//   else console.log(b)
+// })
 
 const Route = Router.Route
     , DefaultRoute = Router.DefaultRoute

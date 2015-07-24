@@ -3,6 +3,8 @@ var SerialPort = require('serialport')
   , intel_hex = require('intel-hex')
   , Stk500 = require('stk500')
   , _ = require('underscore')
+  , request = require('request')
+  , url = require('url')
 
 
 var borgutil = {
@@ -47,6 +49,15 @@ var borgutil = {
       console.log(e.stack)
       if (_.isFunction(cb)) cb(e)
     }
+  }
+, login: function (uuid, token, cb) {
+    var form = {form: {userName: uuid, userPassword: token}}
+    request.post(url.resolve(this._host, '/api/v1/login'), form, (e, r, b) => {
+      if (_.isFunction(cb)) cb(e, b)
+    })
+  }
+, setHost: function (host) {
+    this._host = host
   }
 }
 

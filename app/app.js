@@ -1,5 +1,4 @@
 import React from 'react'
-import Upload from './upload'
 import MyNavBar from './nav-bar'
 import {
   Styles, RaisedButton, SelectField, DropDownMenu, AppBar, Tab, Tabs, AppCanvas
@@ -27,7 +26,7 @@ class App extends React.Component{
   }
 
   componentDidUpdate() {
-    
+
   }
 
   render() {

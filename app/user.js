@@ -8,20 +8,41 @@ class User {
     this.online = false
   }
 
-  login(token, cb) {
+  login(opts, cb) {
     let self = this
-    butil.login(this.uuid, token, function (err, devices) {
+    if (this.uuid && opts.uuid) {
+      let err = new Error('Logout first')
+      if (_.isFunction(cb)) return cb(err)
+    }
+    if (_.isString(opts)) opts = {token: opts}
+    if (opts.uuid) this.uuid = opts.uuid
+
+    butil.login(this.uuid, opts.token, function (err, res) {
       if (!err) {
-        self.devices = devices
-        self.online = true
-        // CHANGE THIS ASAP
-        self.token = token
+        res = JSON.parse(res)
+        if (res.status === 'ok') {
+          self.devices = res.devices
+          self.online = true
+          // CHANGE THIS ASAP
+          self.token = opts.token
+        }
+        else {
+          console.log(res)
+          err = new Error(res.msg)
+        }
       }
       if (_.isFunction(cb)) cb(err)
     })
   }
+
+  logout() {
+    this.uuid = null
+    this.token = null
+    this.devices = null
+    this.online = false
+  }
 }
 
-let user = new User('huangyuelong@orientsoft.cn')
+let user = new User(null)
 
 export default user

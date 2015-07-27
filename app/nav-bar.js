@@ -2,7 +2,7 @@ import React from 'react'
 import $ from 'jquery'
 import _ from 'underscore'
 import {
-  AppBar, LeftNav, Styles, Card, CardHeader, Avatar, IconMenu
+  AppBar, LeftNav, Styles, Card, CardHeader, Avatar, IconMenu, Dialog, TextField
 } from 'material-ui'
 import MenuItem from 'material-ui/lib/menus/menu-item'
 import butil from './util'
@@ -19,10 +19,10 @@ class MyNavBar extends React.Component {
     , selectValue: null
     , title: 'Borgnix Toolkit'
     }
-    user.login('welcome3', function (err) {
-      if (err) console.log(err)
-      else console.log(this)
-    })
+    // user.login('welcome3', function (err) {
+    //   if (err) console.log(err)
+    //   else console.log(this)
+    // })
   }
 
   componentDidMount() {
@@ -60,25 +60,64 @@ class MyNavBar extends React.Component {
       }}
       header={
         <div className='user-info'>
-        <Avatar style={{float: 'left'}}>{user.uuid[0].toUpperCase()}</Avatar>
+        <Avatar style={{float: 'left'}}>
+          {user.uuid ? user.uuid[0].toUpperCase() : 'B'}
+        </Avatar>
         <IconMenu
             style={{float: 'right'}}
             iconButtonElement={
               <MIconButton icon='more_vert' style={{float: 'right'}}/>
             }>
-          <MenuItem primaryText='Login'/>
-          <MenuItem primaryText='Signup' />
+          {userMenu.bind(this)(user.online)}
         </IconMenu>
 
         <div style={{paddingLeft: 50}}>
-          <span className='primary-text'>{user.uuid.substr(0, user.uuid.indexOf('@'))}</span>
+          <span className='primary-text'>
+            {user.online ? user.uuid.substr(0, user.uuid.indexOf('@')) : 'Please Login'}
+          </span>
           <br />
-          <span className='secondary-text'>{user.uuid.substr(user.uuid.indexOf('@'))}</span>
+          <span className='secondary-text'>
+            {user.online ? user.uuid.substr(user.uuid.indexOf('@')) : ''}
+          </span>
         </div>
 
         </div>
       }>
       </LeftNav>
+
+      <Dialog
+          ref='loginDialog'
+          title='Login'
+          actions={[
+            { text: 'Cancel'}
+          , { text: 'Login'
+            , onTouchTap: ()=>{
+              let self = this
+                , username = self.refs.loginUsername.getValue()
+                , password = self.refs.loginPassword.state.hasValue
+              user.logout()
+              user.login({uuid: username, token: password}, (err)=>{
+                if (err) console.log(err)
+                else {
+                  console.log('login good')
+                  self.refs.loginDialog.dismiss()
+                  self.forceUpdate()
+                  // console.log(user)
+                }
+              })
+            }.bind(this)
+          }]}>
+        <TextField
+            ref='loginUsername'
+            defaultValue='huangyuelong@orientsoft.cn'
+            floatingLabelText='Username'/>
+        <br />
+        <TextField
+            ref='loginPassword'
+            floatingLabelText='Password'>
+          <input type='password'/>
+        </TextField>
+      </Dialog>
       </div>
 
     )
@@ -91,6 +130,27 @@ MyNavBar.childContextTypes = {
 
 MyNavBar.contextTypes = {
   router: React.PropTypes.func
+}
+
+function userMenu(online) {
+  if (online)
+    return [
+      <MenuItem
+          primaryText='Logout'
+          onTouchTap={()=>{
+            user.logout()
+            this.forceUpdate()
+          }}/>
+    ]
+  else
+    return [
+      <MenuItem
+          primaryText='Login'
+          onTouchTap={()=>{
+            this.refs.loginDialog.show()
+          }}/>
+    , <MenuItem primaryText='Signup'/>
+    ]
 }
 
 export default MyNavBar

@@ -1,7 +1,7 @@
 import React from 'react'
 import MIconButton from './material-icon-button'
 import ThemeManager from './theme'
-import {RaisedButton, IconMenu} from 'material-ui'
+import {IconMenu} from 'material-ui'
 import MenuItem from 'material-ui/lib/menus/menu-item'
 import $ from 'jquery'
 import path from 'path'
@@ -28,12 +28,12 @@ class FileSelect extends React.Component {
             openDirection='bottom-right'>
           <MenuItem
               primaryText='Local File'
-              onTouchTap={()=>{
+              onTouchTap={function(){
                 $(React.findDOMNode(this.refs.input)).click()
               }.bind(this)}/>
           <MenuItem primaryText='Cloud File' />
         </IconMenu>
-        <span className='label'>{'File: '+path.basename(this.state.filename)}</span>
+        <span className='label'>{'File: ' + path.basename(this.state.filename)}</span>
         <input type='file' ref='input' style={{display: 'none'}} accept='.hex'
             onChange={(e)=>{
               this.setState({

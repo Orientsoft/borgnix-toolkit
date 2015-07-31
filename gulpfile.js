@@ -6,13 +6,15 @@ var gulp = require('gulp')
   , del = require('del')
   , minimist = require('minimist')
   , babel = require('gulp-babel')
-  , watch = require('gulp-watch')
+  // , watch = require('gulp-watch')
 
   , browserify = require('browserify')
   , babelify = require('babelify')
   , watchify = require('watchify')
   , source = require('vinyl-source-stream')
   , concat = require('gulp-concat')
+
+const NW_VERSION = '0.12.2'
 
 function getPlatform () {
   var arch = (os.arch().indexOf('64') != -1 ? '64' : '32')
@@ -22,43 +24,58 @@ function getPlatform () {
   return 'linux' + arch
 }
 
+function printErrorStack(err) {
+  if (err) console.log(err.stack || err)
+}
+
 var argv = minimist(process.argv.slice(2))
 
 var isWin = /^win/.test(process.platform)
 var goodSlash = isWin ? '\\' : '/'
 var badSlash = isWin ? /\//g : /\\/g
 
-gulp.task('install', ['node-rebuild', 'bower-install'])
+gulp.task('install', ['node-rebuild', 'vendor'])
 
 var flags = ''
 if (argv.a) flags += ' --target_arch=' + argv.a
 if (argv.p) flags += ' --target_platform=' + argv.p
 if (argv.d) serialportDir = 'node_modules/serialport'
 else serialportDir = 'temp/node_modules/serialport'
+
 gulp.task('node-rebuild', shell.task([
-  'node-pre-gyp rebuild --runtime=node-webkit --target=0.12.2' + flags
+  'node-pre-gyp rebuild --runtime=node-webkit --target=' + NW_VERSION + flags
 ], {cwd: serialportDir}))
 
-gulp.task('bower-install', shell.task([
-  'node_modules/.bin/bower install'.replace(badSlash, goodSlash)
-, 'node_modules/.bin/bower-installer'.replace(badSlash, goodSlash)
-]))
+gulp.task('vendor', function () {
+  gulp.src(['node_modules/bootstrap/dist/**'])
+      .pipe(gulp.dest('vendor/bootstrap'))
+
+  gulp.src(['node_modules/material-design-icons/iconfont/**'])
+      .pipe(gulp.dest('vendor/material-design-icons/iconfont'))
+})
 
 gulp.task('prebuild', function () {
   // copy production node dependencies
   var setting = require('./package.json')
-    , deps = '*(' + _.keys(setting.dependencies).join('|') + ')'
-  gulp.src('./node_modules/'+deps+'/**')
+    , exclude = ['material-design-icons', 'bootstrap']
+    , deps = _.keys(setting.dependencies).filter(function (dep) {
+        return !_.contains(exclude, dep)
+      })
+    , include = '*(' + deps.join('|') + ')'
+  gulp.src('./node_modules/'+include+'/**')
+      .on('error', printErrorStack)
       .pipe(gulp.dest('temp/node_modules'))
 
   // copy needed folders
-  var folders = [ 'config', 'css', 'js', 'node', 'vendor', 'hex']
+  var folders = [ 'config', 'css', 'convert', 'vendor', 'hex']
   gulp.src('./*('+folders.join('|')+')/**')
+      .on('error', printErrorStack)
       .pipe(gulp.dest('temp'))
 
   // copy needed files in root
-  var files = [ 'index.html', 'package.json', 'LICENSE']
+  var files = [ 'new.html', 'package.json', 'LICENSE']
   gulp.src('./*(' + files.join('|') + ')')
+      .on('error', printErrorStack)
       .pipe(gulp.dest('temp'))
 })
 
@@ -69,7 +86,7 @@ gulp.task('clean', function () {
 gulp.task('build', function () {
   var option = {
     files: './temp/**'
-  , version: '0.12.2'
+  , version: NW_VERSION
   }
 
   if (argv.p) {
@@ -90,6 +107,7 @@ gulp.task('build', function () {
 gulp.task('run', function () {
   var nw = new NwBuilder({
     files: './**/**'
+  , version: NW_VERSION
   , platforms: [getPlatform()]
   })
 
@@ -99,51 +117,15 @@ gulp.task('run', function () {
   })
 })
 
-gulp.task('es6', function () {
-  watch('app/**/*.js', function () {
-    console.log('file changed')
-    gulp.src('app/**/*.js')
-        .pipe(babel().on('error', function (err) {
-          console.error(err)
-        }))
-        .pipe(gulp.dest('convert'))
-  })
-    .on('error', function (err) {
-      console.error(err)
-    })
+gulp.task('watch', function () {
+  gulp.watch('app/**/*.js', 'es6')
 })
 
-gulp.task('browserify', function () {
-  var bundler = browserify({
-    entries: ['./app/main.js']
-  , transform: [babelify]
-  , debug: true
-  , cache: {}
-  , packageCache: {}
-  , fullPaths: true
-  })
-
-  var watcher = watchify(bundler)
-
-  return watcher
-    .on('update', function () { // When any files update
-        var updateStart = Date.now()
-        console.log('Updating!')
-        watcher.bundle()// Create new bundle that uses the cache for high performance
-        .on('error', function (err) {
-          console.error(err.stack)
-        })
-        .pipe(source('main.js'))
-    // This is where you add uglifying etc.
-        .pipe(gulp.dest('convert'))
-        console.log('Updated!', (Date.now() - updateStart) + 'ms')
-    })
-    .bundle() // Create the initial bundle when starting the task
-    .on('error', function (err) {
-      console.error(err.stack || err)
-    })
-    .pipe(source('main.js'))
-    .pipe(gulp.dest('convert'))
+gulp.task('es6', function () {
+  gulp.src('app/**/*.js')
+      .pipe(babel().on('error', printErrorStack))
+      .pipe(gulp.dest('convert'))
+      .on('error', printErrorStack)
 })
 
 gulp.task('default', function () {

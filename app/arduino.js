@@ -2,8 +2,7 @@ import React from 'react'
 import $ from 'jquery'
 import _ from 'underscore'
 import {
-  Styles, RaisedButton, SelectField, DropDownMenu, AppBar, Tab, Tabs
-, Toolbar, ToolbarGroup, IconButton, ToolbarTitle, Dialog, TextField
+  SelectField, Dialog, TextField
 , List, ListItem, FontIcon, FlatButton, Snackbar
 } from 'material-ui'
 import MenuItem from 'material-ui/lib/menus/menu-item'
@@ -14,32 +13,30 @@ import Terminals from './terminals'
 import pubsub from 'pubsub-js'
 import ThemeManager from './theme'
 import MIconButton from './material-icon-button'
-import db from './db'
+// import db from './db'
 import {SerialPort} from 'serialport'
 import FileSelect from './file-select'
-import fs from 'fs'
+// import fs from 'fs'
 import BAC from 'arduino-compiler/client-node'
 import BoardSelect from './board-select'
 
 let bac = new BAC({ host: 'http://localhost:3000', prefix: '/c'})
-
-console.log(bac.getBoards)
 
 bac.getBoards(function (err, boards) {
   if (err) console.log(err)
   console.log(JSON.parse(boards))
 })
 
-let baudrates = [
-  300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 250000
-]
+// let baudrates = [
+//   300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 250000
+// ]
 
-let standardActions = [
-  { text: 'Cancel' },
-  { text: 'Submit', onTouchTap: function () {
-    console.log('action!')
-  }}
-]
+// let standardActions = [
+//   { text: 'Cancel' },
+//   { text: 'Submit', onTouchTap: function () {
+//     console.log('action!')
+//   }}
+// ]
 
 function newPortAction(self) {
   return [
@@ -79,7 +76,7 @@ function newPortAction(self) {
 }
 
 
-function uploadAction(self) {
+function uploadAction() {
   return [
     {text: 'Cancel'}
   , { text: 'Upload'
@@ -114,7 +111,7 @@ function uploadAction(self) {
             if (!err) self.refs.uploadDialog.dismiss()
             setTimeout(function () {
               self.refs.uploadProgress.dismiss()
-            }, 1000);
+            }, 1000)
           })
         }
       }.bind(self)
@@ -144,7 +141,7 @@ class Upload extends React.Component {
     pubsub.publish('change_title', 'Borgnix Arduino Tool')
     butil.getPorts(function (ports) {
       self.setState({
-        ports: ports.map(function (port, i) {
+        ports: ports.map(function (port) {
           return {name: port.comName}
         })
       , selectedPort: self.state.selectedPort || ports[0].name
@@ -161,7 +158,7 @@ class Upload extends React.Component {
     let win = gui.Window.get()
       , w = win.width
       , h = win.height
-    win.resizeTo( w, h+1)
+    win.resizeTo( w, h + 1)
     win.resizeTo( w, h)
 
     $(window).resize(function () {
@@ -188,7 +185,7 @@ class Upload extends React.Component {
               style={{height: this.state.height}}>
             {
               this.state.dockedPorts.map((port)=>{
-                let ref = 'portItem'+port.alias
+                let ref = 'portItem' + port.alias
                 return (
                   <ListItem
                       ref={ref}
@@ -199,10 +196,10 @@ class Upload extends React.Component {
                                   : '')}
                                 </FontIcon>}
                       rightIconButton={self._rightIconMenu(ref)}
-                      onTouchTap={(ref, e)=>{
-                        let portAlias = this.refs[ref].props.primaryText
-                        let targetPort = _.find(this.state.dockedPorts, function (port) {
-                          return port.alias === portAlias
+                      onTouchTap={function (name) {
+                        let portAlias = this.refs[name].props.primaryText
+                        let targetPort = _.find(this.state.dockedPorts, function (dockedPort) {
+                          return dockedPort.alias === portAlias
                         })
                         this.setState({
                           activePort: targetPort
@@ -235,7 +232,7 @@ class Upload extends React.Component {
                    , paddingLeft: 0}}>
           <Terminals
               ref='terms' lineHeight={17}
-              onContextMenu={(e)=>{
+              onContextMenu={function (e) {
                 // console.log('context menu', this)
                 e.preventDefault()
                 console.log(e.pageX, e.pageY)
@@ -258,7 +255,7 @@ class Upload extends React.Component {
                 label='send' secondary={true} ref='serialSend'
                 onTouchTap={function () {
                   let sp = this.serialPort[this.state.activePort.name]
-                  sp.write(this.refs.serialInput.getValue()+'\n')
+                  sp.write(this.refs.serialInput.getValue() + '\n')
                   this.refs.serialInput.clearValue()
                 }.bind(this)}
                 style={{left: 20}}/>
@@ -286,7 +283,7 @@ class Upload extends React.Component {
         <SelectField
           ref='uploadPort'
           value={this.state.selectedPort}
-          onChange={this._handleSelectValueChange.bind(this, "selectedPort")}
+          onChange={this._handleSelectValueChange.bind(this, 'selectedPort')}
           floatingLabelText="Serial Port"
           valueMember='name'
           displayMember='name'
@@ -310,7 +307,7 @@ class Upload extends React.Component {
         <SelectField
           ref='portName'
           value={this.state.selectedPort}
-          onChange={this._handleSelectValueChange.bind(this, "selectedPort")}
+          onChange={this._handleSelectValueChange.bind(this, 'selectedPort')}
           floatingLabelText="Serial Port"
           valueMember='name'
           displayMember='name'
@@ -367,9 +364,8 @@ class Upload extends React.Component {
                   return port.alias !== portAlias
                 })
               , ports: this.state.ports.map((port)=>{
-                  if (port.alias === portAlias) {
+                  if (port.alias === portAlias)
                     return _.omit(port, 'alias')
-                  }
                   return port
                 })
               , activePort: _.find(this.state.dockedPorts, (port)=>{
@@ -394,10 +390,10 @@ class Upload extends React.Component {
     sp.on('open', function () {
       console.log(portName, 'opened')
       sp.on('data', function (data) {
-        pubsub.publish('console_output_'+portAlias, data)
+        pubsub.publish('console_output_' + portAlias, data)
       })
       sp.on('error', function (err) {
-        publish.publish('console_output_'+portAlias, err)
+        pubsub.publish('console_output_' + portAlias, err)
       })
     })
   }
@@ -405,7 +401,7 @@ class Upload extends React.Component {
   clearActiveConsole() {
     let clear = '\u001b[2J\u001b[0;0H'
       , portAlias = this.state.activePort.alias
-    pubsub.publish('console_output_'+portAlias, clear)
+    pubsub.publish('console_output_' + portAlias, clear)
   }
 }
 

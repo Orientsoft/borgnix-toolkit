@@ -1,8 +1,8 @@
 import React from 'react'
-import $ from 'jquery'
-import _ from 'underscore'
+// import $ from 'jquery'
+// import _ from 'underscore'
 import {
-  Styles, RaisedButton, SelectField, DropDownMenu, AppBar, Tab, Tabs
+  Styles, Tab, Tabs
 } from 'material-ui'
 // import SerialPort from 'serialport'
 import butil from './util'
@@ -24,7 +24,7 @@ class Debug extends React.Component {
     pubsub.publish('change_title', 'Test')
     butil.getPorts(function (ports) {
       self.setState({
-        ports: ports.map(function (port, i) {
+        ports: ports.map(function (port) {
           return {name: port.comName}
         })
       , selectValue: self.state.selectValue || ports[0].name
@@ -41,7 +41,7 @@ class Debug extends React.Component {
   render() {
     return (
       <div className='no-select'>
-        <Tabs tabWidth={75}  tabItemContainerStyle={{width: 150}}>
+        <Tabs tabWidth={75} tabItemContainerStyle={{width: 150}}>
           <Tab label='tab 1'>111</Tab>
           <Tab label='tab 2'>222</Tab>
         </Tabs>

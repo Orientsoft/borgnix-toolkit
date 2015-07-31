@@ -19,6 +19,7 @@ class BoardSelect extends React.Component {
       , self = this
 
     bac.getBoards(function (err, res) {
+      if (err) console.log(err.stack || err)
       let boards = _.map(JSON.parse(res), (b, i)=>{
         if (b.signature)
           b.signature = new Buffer(b.signature, 'hex')
@@ -49,8 +50,7 @@ class BoardSelect extends React.Component {
         valueMember='id'
         value={this.state.selectedBoard}
         menuItems={this.state.boards}
-        onChange={this._handleSelectValueChange.bind(this, 'selectedBoard')}>
-      </SelectField>
+        onChange={this._handleSelectValueChange.bind(this, 'selectedBoard')}/>
     )
   }
 

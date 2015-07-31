@@ -21,7 +21,7 @@ class Terminals extends React.Component {
             return (
               <Terminal
                  id={term.id}
-                 ref={'term_'+term.id}
+                 ref={'term_' + term.id}
                  style={_.extend(display, self.props.style)}
                  lineHeight={self.props.lineHeight}/>
             )
@@ -47,7 +47,8 @@ class Terminals extends React.Component {
 }
 
 Terminals.propTypes = {
-
+  onContextMenu: React.PropTypes.func
+, terms: React.PropTypes.array
 }
 
 Terminals.defaultProps = {

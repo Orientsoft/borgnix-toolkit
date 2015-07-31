@@ -1,6 +1,6 @@
 var SerialPort = require('serialport')
   , fs = require('fs')
-  , intel_hex = require('intel-hex')
+  , intelHex = require('intel-hex')
   , Stk500 = require('stk500')
   , _ = require('underscore')
   , request = require('request')
@@ -10,24 +10,27 @@ var SerialPort = require('serialport')
 var borgutil = {
   getPorts: function (cb) {
     SerialPort.list(function (err, ports) {
+      if (err) borgutil.printErrorStack(err)
       if (_.isFunction(cb)) cb(ports)
     })
   }
 
 , resetSerialPort: function (port, cb) {
-    port.set({rts: true, dtr: true}, function (err) {
-      setTimeout(function () {
-        port.set({rts: false, dtr: false}, function (err) {
-          if (_.isFunction(cb)) cb(err)
-        })
-      }, 100)
+    port.set({rts: true, dtr: true}, function (err1) {
+      if (err1) borgutil.printErrorStack(err1)
+      else
+        setTimeout(function () {
+          port.set({rts: false, dtr: false}, function (err2) {
+            if (_.isFunction(cb)) cb(err2)
+          })
+        }, 100)
     })
   }
 
 , uploadHex: function (port, filename, board, cb) {
     try {
       var data = fs.readFileSync(filename, { encoding: 'utf8' })
-        , hex = intel_hex.parse(data).data
+        , hex = intelHex.parse(data).data
 
       var uploadPort = new SerialPort.SerialPort(port, {
         baudrate: board.baud
@@ -35,18 +38,23 @@ var borgutil = {
 
       uploadPort.on('open', function () {
         borgutil.resetSerialPort(uploadPort, function () {
-          Stk500.bootload(uploadPort, hex, board, function(error){
-            uploadPort.close(function (error) {
-              if (error) console.log(error)
-              else console.log('upload finish')
-              if (_.isFunction(cb)) cb(error)
-            })
+          Stk500.bootload(uploadPort, hex, board, function(err1){
+            if (err1) {
+              borgutil.printErrorStack(err1)
+              if (_.isFunction(cb)) cb(err1)
+            }
+            else
+              uploadPort.close(function (err2) {
+                if (err2) console.log(err2)
+                else console.log('upload finish')
+                if (_.isFunction(cb)) cb(err2)
+              })
           })
         })
       })
     }
     catch (e) {
-      console.log(e.stack)
+      borgutil.printErrorStack(e)
       if (_.isFunction(cb)) cb(e)
     }
   }
@@ -58,6 +66,9 @@ var borgutil = {
   }
 , setHost: function (host) {
     this._host = host
+  }
+, printErrorStack: function (err) {
+    if (err) console.log(err.stack || err)
   }
 }
 

@@ -30,9 +30,9 @@ class TerminalComponent extends React.Component {
     $(window).resize(function () {
       self.resize()
     })
-    this.term.write('terminal id: '+this.props.id.toString())
+    this.term.write('terminal id: ' + this.props.id.toString())
 
-    pubsub.subscribe('console_output_'+this.props.id, function (topic, data) {
+    pubsub.subscribe('console_output_' + this.props.id, function (topic, data) {
       self.term.writeln(data)
     })
   }
@@ -72,6 +72,11 @@ class TerminalComponent extends React.Component {
 
 TerminalComponent.defaultProps = {
   lineHeight: 14
+}
+
+TerminalComponent.propTypes = {
+  id: React.PropTypes.string
+, lineHeight: React.PropTypes.number
 }
 
 export default TerminalComponent

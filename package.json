@@ -44,7 +44,9 @@
   },
   "homepage": "https://github.com/Orientsoft/borgnix-toolkit#readme",
   "dependencies": {
+    "arduino-compiler": "git+https://github.com/Orientsoft/borgnix-arduino-compiler.git",
     "async": "^1.2.1",
+    "bootstrap": "^3.3.5",
     "colors": "^1.1.2",
     "intel-hex": "^0.1.1",
     "jquery": "^2.1.4",
@@ -56,9 +58,7 @@
     "react-router": "^0.13.3",
     "react-tap-event-plugin": "^0.1.7",
     "request": "^2.60.0",
-    "requirejs-babel": "0.0.6",
     "serialport": "^1.7.4",
-    "socket.io": "^1.3.5",
     "stk500": "^1.0.3",
     "term.js": "0.0.5",
     "underscore": "^1.8.3"
@@ -69,6 +69,8 @@
     "bower-installer": "^1.2.0",
     "browserify": "^10.2.6",
     "del": "^1.2.0",
+    "eslint": "^0.24.1",
+    "eslint-plugin-react": "^3.1.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.1.0",
     "gulp-concat": "^2.6.0",

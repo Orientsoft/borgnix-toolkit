@@ -118,7 +118,7 @@ gulp.task('run', function () {
 })
 
 gulp.task('watch', function () {
-  gulp.watch('app/**/*.js', 'es6')
+  gulp.watch('app/**/*.js', ['es6'])
 })
 
 gulp.task('es6', function () {

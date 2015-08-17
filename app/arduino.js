@@ -17,15 +17,20 @@ import MIconButton from './material-icon-button'
 import {SerialPort} from 'serialport'
 import FileSelect from './file-select'
 // import fs from 'fs'
-import BAC from 'arduino-compiler/client-node'
+// import BAC from 'arduino-compiler/client-node'
 import BoardSelect from './board-select'
+// import {borgnixJar} from './cookie-jar'
 
-let bac = new BAC({ host: 'http://localhost:3000', prefix: '/c'})
+// let bac = new BAC({
+//   host: 'http://voyager.orientsoft.cn'
+// , prefix: '/arduino/c'
+// , jar: borgnixJar
+// })
 
-bac.getBoards(function (err, boards) {
-  if (err) console.log(err)
-  console.log(JSON.parse(boards))
-})
+// bac.getBoards(function (err, boards) {
+//   if (err) console.log(err)
+//   console.log(JSON.parse(boards))
+// })
 
 // let baudrates = [
 //   300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 250000
@@ -76,20 +81,20 @@ function newPortAction(self) {
 }
 
 
-function uploadAction() {
+function uploadAction(self) {
   return [
     {text: 'Cancel'}
   , { text: 'Upload'
     , onTouchTap: function(){
-      // console.log(this)
-        let self = this
-        let fileType = 'local'
+        console.log(this)
+        // let self = this
+        let fileType = this.state.uploadType
           , fileName = this.refs.uploadFileName.getValue()
           , port = this.refs.uploadPort.props.value
         let board = this.refs.uploadBoard.getSelectedBoard()
 
         let param = {
-          name: board.name
+          name: board.id
         , baud: parseInt(board.upload.speed)
         , signature: board.signature
         , pageSize: 128
@@ -97,6 +102,7 @@ function uploadAction() {
         }
 
         console.log(board)
+        console.log('TYPE', fileType)
 
         if (fileType === 'local') {
           this.setState({
@@ -104,6 +110,23 @@ function uploadAction() {
           })
           this.refs.uploadProgress.show()
           butil.uploadHex(port, fileName, param, function (err) {
+            if (err) console.log(err)
+            self.setState({
+              uploadMessage: (err ? 'error' : 'successful')
+            })
+            if (!err) self.refs.uploadDialog.dismiss()
+            setTimeout(function () {
+              self.refs.uploadProgress.dismiss()
+            }, 1000)
+          })
+        }
+        else {
+          console.log('upload remote file')
+          this.setState({
+            uploadMessage: 'progress'
+          })
+          this.refs.uploadProgress.show()
+          butil.uploadRemoteHex(port, fileName, param, function (err) {
             if (err) console.log(err)
             self.setState({
               uploadMessage: (err ? 'error' : 'successful')
@@ -133,12 +156,41 @@ class Upload extends React.Component {
     , footerHeight: 0
     , activePort: {}
     , uploadMessage: 'Uploading'
+    , hexFiles: []
+    , uploadFile: 'No File Selected'
+    , uploadType: 'local'
     }
   }
 
   componentDidMount() {
     var self = this
     pubsub.publish('change_title', 'Borgnix Arduino Tool')
+    pubsub.subscribe('show_cloud_files', (topic, files)=>{
+      console.log('i got', files)
+      self.setState({
+        hexFiles: files
+      , uploadFile: 'No File Selected'
+      })
+      self.refs.uploadDialog.dismiss()
+      self.refs.cloudFilesDialog.show()
+    })
+    pubsub.subscribe('select_cloud_file', (topic, file)=>{
+      console.log('selected', file)
+      console.log(self)
+      self.setState({
+        uploadFile: file
+      , uploadType: 'remote'
+      })
+      self.refs.cloudFilesDialog.dismiss()
+      self.refs.uploadDialog.show()
+    })
+
+    pubsub.subscribe('select_local_file', ()=>{
+      self.setState({
+        uploadType: 'local'
+      })
+    })
+
     butil.getPorts(function (ports) {
       self.setState({
         ports: ports.map(function (port) {
@@ -190,11 +242,13 @@ class Upload extends React.Component {
                   <ListItem
                       ref={ref}
                       primaryText={port.alias}
-                      leftIcon={<FontIcon className='material-icons'>
-                                  {( self.state.activePort.name === port.name
-                                  ? 'done'
-                                  : '')}
-                                </FontIcon>}
+                      leftIcon={
+                        <FontIcon className='material-icons'>
+                          {( self.state.activePort.name === port.name
+                           ? 'done'
+                           : '')}
+                        </FontIcon>
+                      }
                       rightIconButton={self._rightIconMenu(ref)}
                       onTouchTap={function (name) {
                         let portAlias = this.refs[name].props.primaryText
@@ -261,12 +315,9 @@ class Upload extends React.Component {
                 style={{left: 20}}/>
             <FlatButton
                 label='clear' secondary={true} ref='serialClear'
-                onTouchTap={function () {
-                  // let sp = this.serialPort[this.state.activePort.name]
-                  // sp.write(this.refs.serialInput.getValue()+'\n')
-                  // this.refs.serialInput.clearValue()
+                onTouchTap={()=>{
                   this.clearActiveConsole()
-                }.bind(this)}
+                }}
                 style={{left: 20}}/>
           </div>
         </div>
@@ -291,7 +342,7 @@ class Upload extends React.Component {
         <br/>
         <BoardSelect ref='uploadBoard' />
         <br/>
-        <FileSelect ref='uploadFileName'/>
+        <FileSelect ref='uploadFileName' filename={this.state.uploadFile}/>
         <br/>
         <br/>
         <br/>
@@ -314,6 +365,23 @@ class Upload extends React.Component {
           menuItems={this.state.ports.filter(function (port) {
             return _.isUndefined(port.alias)
           })}/>
+      </Dialog>
+
+      <Dialog ref='cloudFilesDialog' header='Cloud Hex Files'>
+        <List>
+        {
+          this.state.hexFiles.map((file, i)=>{
+            console.log(file)
+            return (
+              <ListItem
+                  primaryText={file}
+                  onTouchTap={function (idx){
+                    pubsub.publish('select_cloud_file', this.state.hexFiles[idx])
+                  }.bind(this, i)}/>
+            )
+          })
+        }
+        </List>
       </Dialog>
 
       <Snackbar

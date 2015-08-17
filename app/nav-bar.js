@@ -65,7 +65,7 @@ class MyNavBar extends React.Component {
       <AppBar
         title={this.state.title}
         iconElementRight={<MIconButton icon='help' />}
-        onLeftIconButtonTouchTap={function () {
+        onLeftIconButtonTouchTap={()=>{
           this.refs.leftNav.toggle()
         }} />
 
@@ -74,9 +74,8 @@ class MyNavBar extends React.Component {
           docked={false}
           menuItems={[
             {route: 'upload', text: 'Arduino'}
-          , {route: 'debug', text: 'Test'}
           ]}
-          onChange={function (e, selectedIndex, item) {
+          onChange={(e, selectedIndex, item)=>{
             // console.log(menuItems)
             this.context.router.transitionTo(item.route)
           }}
@@ -115,7 +114,7 @@ class MyNavBar extends React.Component {
           actions={[
             { text: 'Cancel'}
           , { text: 'Login'
-            , onTouchTap: function(){
+            , onTouchTap: ()=>{
               let self = this
                 , username = self.refs.loginUsername.getValue()
                 , password = self.refs.loginPassword.state.hasValue
@@ -129,7 +128,7 @@ class MyNavBar extends React.Component {
                   // console.log(user)
                 }
               })
-            }.bind(this)
+            }
           }]}>
         <TextField
             ref='loginUsername'

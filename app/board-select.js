@@ -3,6 +3,7 @@ import {SelectField} from 'material-ui'
 import ThemeManager from './theme'
 import BAC from 'arduino-compiler/client-node'
 import _ from 'underscore'
+import {borgnixJar} from './cookie-jar'
 
 class BoardSelect extends React.Component {
   constructor(props) {
@@ -15,12 +16,19 @@ class BoardSelect extends React.Component {
   }
 
   componentDidMount() {
-    let bac = new BAC({ host: 'http://localhost:3000', prefix: '/c'})
+    let bac = new BAC({
+      host: 'http://voyager.orientsoft.cn'
+    , prefix: '/arudino/c'
+    , jar: borgnixJar
+    })
       , self = this
 
-    bac.getBoards(function (err, res) {
+    bac.getBoardsOffline()
+
+    bac.getBoardsOffline(function (err, res) {
       if (err) console.log(err.stack || err)
-      let boards = _.map(JSON.parse(res), (b, i)=>{
+      console.log(res)
+      let boards = _.map(res, (b, i)=>{
         if (b.signature)
           b.signature = new Buffer(b.signature, 'hex')
         b.id = i

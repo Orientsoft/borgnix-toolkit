@@ -21,28 +21,6 @@ import FileSelect from './file-select'
 import BoardSelect from './board-select'
 // import {borgnixJar} from './cookie-jar'
 
-// let bac = new BAC({
-//   host: 'http://voyager.orientsoft.cn'
-// , prefix: '/arduino/c'
-// , jar: borgnixJar
-// })
-
-// bac.getBoards(function (err, boards) {
-//   if (err) console.log(err)
-//   console.log(JSON.parse(boards))
-// })
-
-// let baudrates = [
-//   300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400, 250000
-// ]
-
-// let standardActions = [
-//   { text: 'Cancel' },
-//   { text: 'Submit', onTouchTap: function () {
-//     console.log('action!')
-//   }}
-// ]
-
 function newPortAction(self) {
   return [
     {text: 'Cancel'}
@@ -449,7 +427,6 @@ class Upload extends React.Component {
     console.log(this.state.activePort)
     let portName = this.state.activePort.name
       , portAlias = this.state.activePort.alias
-
 
     let sp = new SerialPort(portName, {baudrate: 19200})
 

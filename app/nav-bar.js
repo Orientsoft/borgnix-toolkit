@@ -122,7 +122,7 @@ class MyNavBar extends React.Component {
               user.login({uuid: username, token: password}, (err)=>{
                 if (err) console.log(err)
                 else {
-                  console.log('login good')
+                  // console.log('login good')
                   self.refs.loginDialog.dismiss()
                   self.forceUpdate()
                   // console.log(user)
@@ -132,7 +132,7 @@ class MyNavBar extends React.Component {
           }]}>
         <TextField
             ref='loginUsername'
-            defaultValue='huangyuelong@orientsoft.cn'
+            // defaultValue='huangyuelong@orientsoft.cn'
             floatingLabelText='Username'/>
         <br />
         <TextField

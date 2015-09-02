@@ -128,6 +128,40 @@ gulp.task('es6', function () {
       .on('error', printErrorStack)
 })
 
+gulp.task('watch', function () {
+  var file = 'main.js'
+  var bundler = browserify({
+    entries: ['./app-admin/' + file]
+  , transform: [babelify]
+  , debug: true
+  , cache: {}
+  , packageCache: {}
+  // , fullPaths: true
+  })
+
+  var watcher = watchify(bundler)
+
+  watcher.build = function () {
+    console.log('start build')
+    watcher.bundle()
+           .on('error', printErrorStack)
+           .pipe(source(file))
+          //  .pipe(streamify(uglify.js()))
+           .pipe(gulp.dest('./public/js'))
+  }
+
+  watcher.on('error', printErrorStack)
+         .on('update', watcher.build)
+         .on('time', function (time) {
+            console.log('building took:', time)
+          })
+
+  watcher.build()
+
+  // gulp.watch('./less/**.less', ['less'])
+  // gulp.start('less')
+})
+
 gulp.task('default', function () {
   console.log(argv);
 })

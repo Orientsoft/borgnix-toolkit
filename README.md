@@ -20,6 +20,6 @@ gulp run
 
 ## BUILD
 
-```bash
-gulp build
-```
+For development, run `gulp watch`.
+
+For distribution, run `gulp dist`

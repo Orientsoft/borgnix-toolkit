@@ -13,6 +13,7 @@ var gulp = require('gulp')
   , watchify = require('watchify')
   , source = require('vinyl-source-stream')
   , concat = require('gulp-concat')
+  , runSequence = require('run-sequence')
 
 const NW_VERSION = '0.12.2'
 
@@ -39,8 +40,8 @@ gulp.task('install', ['node-rebuild', 'vendor'])
 var flags = ''
 if (argv.a) flags += ' --target_arch=' + argv.a
 if (argv.p) flags += ' --target_platform=' + argv.p
-if (argv.d) serialportDir = 'node_modules/serialport'
-else serialportDir = 'temp/node_modules/serialport'
+if (argv.d) serialportDir = 'temp/node_modules/serialport'
+else serialportDir = 'node_modules/serialport'
 
 gulp.task('node-rebuild', shell.task([
   'node-pre-gyp rebuild --runtime=node-webkit --target=' + NW_VERSION + flags
@@ -62,6 +63,7 @@ gulp.task('prebuild', function () {
         return !_.contains(exclude, dep)
       })
     , include = '*(' + deps.join('|') + ')'
+
   gulp.src('./node_modules/'+include+'/**')
       .on('error', printErrorStack)
       .pipe(gulp.dest('temp/node_modules'))
@@ -128,6 +130,20 @@ gulp.task('es6', function () {
       .on('error', printErrorStack)
 })
 
+gulp.task('dist', function () {
+  runSequence(
+    'clean'
+  , 'node-rebuild'
+  , 'prebuild'
+  , function () {
+      setTimeout(function () {
+        console.log('start building excutable')
+        gulp.run('build')
+      }, 1000);
+    }
+  )
+})
+
 gulp.task('default', function () {
-  console.log(argv);
+  console.log(argv)
 })

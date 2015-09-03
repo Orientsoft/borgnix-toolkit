@@ -71,7 +71,6 @@
     "bower-installer": "^1.2.0",
     "browserify": "^10.2.6",
     "del": "^1.2.0",
-    "enclose": "^0.2.30",
     "eslint": "^0.24.1",
     "eslint-plugin-react": "^3.1.0",
     "gulp": "^3.9.0",
@@ -81,6 +80,7 @@
     "gulp-watch": "^4.3.3",
     "minimist": "^1.1.1",
     "node-webkit-builder": "^1.0.12",
+    "run-sequence": "^1.1.2",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.2.3"
   }

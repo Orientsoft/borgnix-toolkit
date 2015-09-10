@@ -22,6 +22,12 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
+// var session = require('express-session')
+//   , config = require('./lib/config')
+// app.use(session({
+//   secret: config.get('sessionSecret')
+// }))
+
 app.use('/', routes)
 app.use('/users', users)
 

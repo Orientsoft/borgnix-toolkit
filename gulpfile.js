@@ -68,5 +68,5 @@ gulp.task('watch', function () {
 })
 
 gulp.task('default', function () {
-  console.log(argv);
+  console.log(argv)
 })

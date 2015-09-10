@@ -33,3 +33,4 @@ vendor
 temp
 convert
 public/js
+config/config.json
